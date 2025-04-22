@@ -1,0 +1,223 @@
+/* public/css/style.css */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    padding-bottom: 0.5rem;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #444;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline-block;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    display: block;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+main {
+    padding: 20px;
+    max-width: 100%;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 15px;
+    color: #777;
+    border-top: 1px solid #eee;
+}
+
+.table-container {
+    overflow-x: auto; /* Дозволяє прокрутку таблиць на малих екранах */
+    margin-bottom: 25px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px 12px; /* Збільшив відступи */
+    text-align: left;
+    vertical-align: middle; /* Вирівнювання по центру */
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.average-table table {
+    width: 50%; /* Менша ширина для таблиці середніх значень */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Стилі для кнопок та посилань */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+button, .btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 2px;
+}
+
+.btn-primary, button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover, button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: black;
+}
+.edit-btn:hover {
+    background-color: #e0a800;
+}
+
+ .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+ .cancel-btn {
+     background-color: #6c757d;
+     color: white;
+     display: inline-block; /* Щоб виглядав як кнопка */
+     padding: 8px 15px;
+     border-radius: 4px;
+     text-decoration: none;
+     margin-left: 10px;
+ }
+ .cancel-btn:hover {
+     background-color: #5a6268;
+ }
+
+ button:disabled {
+     background-color: #6c757d;
+     cursor: not-allowed;
+ }
+
+ td.actions {
+    white-space: nowrap; /* Заборона переносу кнопок */
+ }
+
+ /* Адмін форми */
+.admin-form {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #eee;
+    background-color: #fdfdfd;
+    border-radius: 5px;
+}
+.admin-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.admin-form input[type="text"],
+.admin-form input[type="url"],
+.admin-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Важливо для width: 100% */
+}
+ .admin-form button[type="submit"] {
+    margin-top: 10px;
+ }
+
+/* Повідомлення */
+ .message {
+     padding: 15px;
+     margin-bottom: 20px;
+     border-radius: 5px;
+     border: 1px solid transparent;
+ }
+ .message.success {
+     color: #155724;
+     background-color: #d4edda;
+     border-color: #c3e6cb;
+ }
+  .message.error {
+     color: #721c24;
+     background-color: #f8d7da;
+     border-color: #f5c6cb;
+ }
+
+/* Адаптивність (простий приклад) */
+@media (max-width: 768px) {
+    nav ul li {
+        display: block;
+        text-align: center;
+    }
+    .average-table table {
+        width: 90%;
+    }
+     .admin-form input[type="text"],
+     .admin-form input[type="url"],
+     .admin-form select {
+        width: calc(100% - 22px); /* Враховуємо padding і border */
+     }
+}

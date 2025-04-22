@@ -1,0 +1,124 @@
+<%- include('partials/header') %>
+
+<h2>Active Projects Report</h2>
+<% if (activeProjectsData && activeProjectsData.length > 0) { %>
+    <div class="table-container">
+        <table> <%# Відкрили таблицю %>
+            <thead>
+                <tr>
+                    <th>Project (from #active_project)</th> <%# Оновлено назву згідно попереднього запиту %>
+                    <th>Score</th>
+                    <th>Issues per Page</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Total</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Critical</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Serious</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Moderate</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Good</th> <%# TODO: Замініть на змістовні назви %>
+                    <th>Scan Date</th>
+                    <th>Report</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% activeProjectsData.forEach(project => { %>
+                    <%
+                       let score = project.score || 'N/A';
+                       let scoreValue = project.scoreValue;
+                       let cellStyle = '';
+                       if (project.success && typeof scoreValue === 'number' && !isNaN(scoreValue)) {
+                           if (scoreValue < 80) cellStyle = 'background-color: #dc3545; color: white;'; // Red
+                           else if (scoreValue < 90) cellStyle = 'background-color: #ffc107; color: black;'; // Yellow
+                           else cellStyle = 'background-color: #28a745; color: white;'; // Green
+                       } else {
+                           cellStyle = 'background-color: #6c757d; color: white;'; // Grey for errors/N/A
+                       }
+                    %>
+                    <tr>
+                        <td><%- project.projectName %></td>
+                        <td style="<%= cellStyle %>"><%= score %></td>
+                        <td><%= project.field3 || 'N/A' %></td>
+                        <td><%= project.field4 || 'N/A' %></td>
+                        <td><%= project.field5 || 'N/A' %></td>
+                        <td><%= project.field6 || 'N/A' %></td>
+                        <td><%= project.field7 || 'N/A' %></td>
+                        <td><%= project.field8 || 'N/A' %></td>
+                        <td><%= project.scanDate || 'N/A' %></td>
+                        <td><%- project.reportButton %></td>
+                        <td><%= project.category %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+    </div>
+<% } else { %>
+    <p>No active projects found or data could not be parsed.</p>
+<% } %>
+
+
+<h2>Average Scores</h2>
+<% if (averageScores && averageScores.length > 0) { %>
+     <div class="table-container average-table">
+        <table> <%# Відкрили таблицю %>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Average Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% averageScores.forEach(avg => { %>
+                     <%
+                       let avgValue = parseFloat(avg.average);
+                       let avgCellStyle = '';
+                        if (!isNaN(avgValue)) {
+                           if (avgValue < 80) avgCellStyle = 'background-color: #dc3545; color: white;';
+                           else if (avgValue < 90) avgCellStyle = 'background-color: #ffc107; color: black;';
+                           else avgCellStyle = 'background-color: #28a745; color: white;';
+                       }
+                    %>
+                    <tr>
+                        <td><%= avg.category %></td>
+                        <td style="<%= avgCellStyle %>"><%= avg.average !== 'N/A' ? avg.average + '%' : 'N/A' %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+    </div>
+<% } else { %>
+    <p>Could not calculate average scores.</p>
+<% } %>
+
+
+<h2>On Hold Projects</h2>
+<% if (onHoldProjects && onHoldProjects.length > 0) { %>
+    <div class="table-container">
+        <table> <%# Відкрили таблицю %>
+            <thead>
+                <tr>
+                    <th>Project URL</th>
+                    <th>Report URL</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% onHoldProjects.forEach(project => { %>
+                    <tr>
+                        <td><a href="<%= project.project_url %>" target="_blank" title="<%= project.project_url %>"><%= project.project_url.length > 50 ? project.project_url.substring(0, 50) + '...' : project.project_url %></a></td>
+                         <td>
+                            <% if (project.report_url && project.report_url !== 'https://example.com') { %>
+                                <a href="<%= project.report_url %>" target="_blank">View Report</a>
+                            <% } else { %>
+                                N/A
+                            <% } %>
+                        </td>
+                        <td><%= project.category %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+    </div>
+<% } else { %>
+    <p>No projects are currently on hold.</p>
+<% } %>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+
+<% if (locals.message) { %>
+    <p class="message <%= message.startsWith('Error:') ? 'error' : 'success' %>"><%= decodeURIComponent(message) %></p>
+<% } %>
+
+<section class="admin-section">
+    <h2>Active Projects</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Project URL</th>
+                    <th>Report URL</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% projects.forEach(p => { %>
+                    <tr>
+                        <td><%= p.id %></td>
+                        <td><a href="<%= p.project_url %>" target="_blank" title="<%= p.project_url %>"><%= p.project_url.length > 40 ? p.project_url.substring(0, 40) + '...' : p.project_url %></a></td>
+                        <td title="<%= p.report_url %>"><%= p.report_url ? (p.report_url.length > 30 ? p.report_url.substring(0, 30) + '...' : p.report_url) : 'N/A' %></td>
+                        <td><%= p.category %></td>
+                        <td class="actions">
+                            <a href="/admin/edit/active/<%= p.id %>" class="btn edit-btn">Edit</a>
+                            <form action="/admin/delete/active/<%= p.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn delete-btn" onclick="return confirm('Delete active project ID <%= p.id %>?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+                 <% if (projects.length === 0) { %>
+                    <tr><td colspan="5">No active projects found.</td></tr>
+                 <% } %>
+            </tbody>
+        </table>
+    </div>
+    <h3>Add New Active Project</h3>
+    <form action="/admin/projects/add" method="POST" class="admin-form">
+        <label for="ap_project_url">Project URL:</label>
+        <input type="url" id="ap_project_url" name="project_url" required>
+
+        <label for="ap_report_url">Report URL:</label>
+        <input type="url" id="ap_report_url" name="report_url" placeholder="Optional (e.g., https://example.com)">
+
+         <label for="ap_category">Category:</label>
+         <select id="ap_category" name="category" required>
+             <option value="" disabled selected>Select Category</option>
+             <option value="NBM">NBM</option>
+             <option value="ThirdParty">ThirdParty</option>
+             <option value="NPPC">NPPC</option>
+             </select>
+
+        <button type="submit" class="btn-primary">Add Active Project</button>
+    </form>
+</section>
+
+<hr style="margin: 30px 0;">
+
+<section class="admin-section">
+    <h2>On Hold Projects</h2>
+     <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Project URL</th>
+                    <th>Report URL</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                 <% onHoldProjects.forEach(p => { %>
+                    <tr>
+                        <td><%= p.id %></td>
+                         <td><a href="<%= p.project_url %>" target="_blank" title="<%= p.project_url %>"><%= p.project_url.length > 40 ? p.project_url.substring(0, 40) + '...' : p.project_url %></a></td>
+                        <td title="<%= p.report_url %>"><%= p.report_url ? (p.report_url.length > 30 ? p.report_url.substring(0, 30) + '...' : p.report_url) : 'N/A' %></td>
+                        <td><%= p.category %></td>
+                        <td class="actions">
+                             <a href="/admin/edit/onhold/<%= p.id %>" class="btn edit-btn">Edit</a>
+                            <form action="/admin/delete/onhold/<%= p.id %>" method="POST" style="display:inline;">
+                                <button type="submit" class="btn delete-btn" onclick="return confirm('Delete on-hold project ID <%= p.id %>?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+                 <% if (onHoldProjects.length === 0) { %>
+                     <tr><td colspan="5">No on-hold projects found.</td></tr>
+                 <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Add New On Hold Project</h3>
+     <form action="/admin/onhold/add" method="POST" class="admin-form">
+        <label for="ohp_project_url">Project URL:</label>
+        <input type="url" id="ohp_project_url" name="project_url" required>
+
+        <label for="ohp_report_url">Report URL:</label>
+        <input type="url" id="ohp_report_url" name="report_url" placeholder="Optional (e.g., https://example.com)">
+
+        <label for="ohp_category">Category:</label>
+        <select id="ohp_category" name="category" required>
+             <option value="" disabled selected>Select Category</option>
+             <option value="NBM">NBM</option>
+             <option value="ThirdParty">ThirdParty</option>
+             <option value="NPPC">NPPC</option>
+             </select>
+
+        <button type="submit" class="btn-primary">Add On Hold Project</button>
+    </form>
+</section>
+
+<%- include('partials/footer') %>

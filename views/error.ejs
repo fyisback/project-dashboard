@@ -1,0 +1,10 @@
+<%- include('partials/header', { pageTitle: locals.statusCode ? `${locals.statusCode} Error` : 'Server Error' }) %>
+<h2><%= locals.statusCode || '500' %> - <%= pageTitle %></h2>
+<p>Sorry, something went wrong on our end.</p>
+<% if (process.env.NODE_ENV !== 'production' && locals.error) { %>
+    <pre style="background-color: #eee; padding: 10px; border: 1px solid #ccc; overflow-x: auto; white-space: pre-wrap;"><%= error.message %><br><br><%= error.stack %></pre>
+<% } else if (locals.error) { %>
+     <p>Please try again later or contact support if the problem persists.</p>
+<% } %>
+ <a href="/">Go to Dashboard</a>
+<%- include('partials/footer') %>

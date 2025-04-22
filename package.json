@@ -1,0 +1,31 @@
+{
+  "name": "project-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard for monitoring project accessibility scores",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dashboard",
+    "nodejs",
+    "express",
+    "sqlite",
+    "parsing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "better-sqlite3": "^9.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "p-limit": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
