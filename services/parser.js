@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 
 async function fetchData(url, retries = 3) {
     try {
-        const { data } = await axios.get(url, { timeout: 1500 }); // Timeout 20 sec
+        const { data } = await axios.get(url, { timeout: 5000 }); // Timeout 20 sec
         return data;
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
