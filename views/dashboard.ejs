@@ -92,10 +92,10 @@
 <h2>On Hold Projects</h2>
 <% if (onHoldProjects && onHoldProjects.length > 0) { %>
     <div class="table-container">
-        <table> <%# Відкрили таблицю %>
+        <table>
             <thead>
                 <tr>
-                    <th>Project URL</th>
+                    <th>Project Title / URL</th> <%# Змінено заголовок %>
                     <th>Report URL</th>
                     <th>Category</th>
                 </tr>
@@ -103,7 +103,19 @@
             <tbody>
                 <% onHoldProjects.forEach(project => { %>
                     <tr>
-                        <td><a href="<%= project.project_url %>" target="_blank" title="<%= project.project_url %>"><%= project.project_url.length > 50 ? project.project_url.substring(0, 50) + '...' : project.project_url %></a></td>
+                        <td>
+                            <%# <<< ОНОВЛЕНО ЛОГІКУ ВИВЕДЕННЯ НАЗВИ >>> %>
+                            <a href="<%= project.project_url %>" target="_blank" title="<%= project.project_url %>">
+                                <% if (project.title && project.title.trim() !== '') { %>
+                                    <%# Виводимо title, якщо він існує і не порожній %>
+                                    <%= project.title %>
+                                <% } else { %>
+                                    <%# Інакше виводимо обрізаний URL %>
+                                    <%= project.project_url.length > 50 ? project.project_url.substring(0, 50) + '...' : project.project_url %>
+                                <% } %>
+                            </a>
+                            <%# <<< /ОНОВЛЕНО ЛОГІКУ ВИВЕДЕННЯ НАЗВИ >>> %>
+                        </td>
                          <td>
                             <% if (project.report_url && project.report_url !== 'https://example.com') { %>
                                 <a href="<%= project.report_url %>" target="_blank">View Report</a>
@@ -115,7 +127,7 @@
                     </tr>
                 <% }) %>
             </tbody>
-        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+        </table>
     </div>
 <% } else { %>
     <p>No projects are currently on hold.</p>

@@ -96,23 +96,28 @@
     </div>
 
     <h3>Add New On Hold Project</h3>
-     <form action="/admin/onhold/add" method="POST" class="admin-form">
-        <label for="ohp_project_url">Project URL:</label>
-        <input type="url" id="ohp_project_url" name="project_url" required>
+    <form action="/admin/onhold/add" method="POST" class="admin-form">
+       <%# <<< ДОДАНО БЛОК ДЛЯ TITLE >>> %>
+       <label for="ohp_title">Project Title (Optional):</label>
+       <input type="text" id="ohp_title" name="title" placeholder="Enter a descriptive title">
+       <%# <<< /ДОДАНО БЛОК ДЛЯ TITLE >>> %>
 
-        <label for="ohp_report_url">Report URL:</label>
-        <input type="url" id="ohp_report_url" name="report_url" placeholder="Optional (e.g., https://example.com)">
+       <label for="ohp_project_url">Project URL:</label>
+       <input type="url" id="ohp_project_url" name="project_url" required>
 
-        <label for="ohp_category">Category:</label>
-        <select id="ohp_category" name="category" required>
-             <option value="" disabled selected>Select Category</option>
-             <option value="NBM">NBM</option>
-             <option value="ThirdParty">ThirdParty</option>
-             <option value="NPPC">NPPC</option>
-             </select>
+       <label for="ohp_report_url">Report URL:</label>
+       <input type="url" id="ohp_report_url" name="report_url" placeholder="Optional (e.g., https://example.com)">
 
-        <button type="submit" class="btn-primary">Add On Hold Project</button>
-    </form>
-</section>
+       <label for="ohp_category">Category:</label>
+       <select id="ohp_category" name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="NBM">NBM</option>
+            <option value="ThirdParty">ThirdParty</option>
+            <option value="NPPC">NPPC</option>
+        </select>
+
+       <button type="submit" class="btn-primary">Add On Hold Project</button>
+   </form>
+</section> <%# Кінець секції On Hold Projects %>
 
 <%- include('partials/footer') %>

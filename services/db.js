@@ -36,26 +36,25 @@ function initializeDatabase() {
         console.error("Database connection not established. Skipping initialization.");
         return;
     }
-    console.log('Initializing database tables with categories: ThirdParty, NBM, NPPC...');
+    console.log('Initializing database tables (with title for on-hold)...'); // Оновлено лог
     try {
         const initTransaction = db.transaction(() => {
-            // Зміни для таблиці projects
+            // Таблиця projects - без змін
             db.exec(`
                 CREATE TABLE IF NOT EXISTS projects (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     project_url TEXT NOT NULL UNIQUE,
                     report_url TEXT,
-                    -- ОНОВЛЕНО ТУТ: Замінили 'Brand' на 'NPPC'
                     category TEXT NOT NULL CHECK(category IN ('NBM', 'ThirdParty', 'NPPC'))
                 );
             `);
-            // Зміни для таблиці on_hold_projects
+            // Таблиця on_hold_projects - ДОДАНО ПОЛЕ title
             db.exec(`
                 CREATE TABLE IF NOT EXISTS on_hold_projects (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT, -- <<< ДОДАНО: Назва проекту (опціональна)
                     project_url TEXT NOT NULL UNIQUE,
                     report_url TEXT,
-                    -- ОНОВЛЕНО ТУТ: Замінили 'Brand' на 'NPPC'
                     category TEXT NOT NULL CHECK(category IN ('NBM', 'ThirdParty', 'NPPC'))
                 );
             `);
@@ -66,7 +65,6 @@ function initializeDatabase() {
          console.error("Error during database table initialization:", initError);
     }
 }
-
 
 initializeDatabase();
 
