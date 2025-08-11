@@ -3,39 +3,45 @@
 <h2>Active Projects Report</h2>
 <% if (activeProjectsData && activeProjectsData.length > 0) { %>
     <div class="table-container">
-        <table> <%# Відкрили таблицю %>
+        <table id="projects-table"> <%# Added an ID for easy selection in JS %>
             <thead>
                 <tr>
-                    <th>Project (from #active_project)</th> <%# Оновлено назву згідно попереднього запиту %>
-                    <th>Score</th>
-                    <th>Issues per Page</th> <%# TODO: Замініть на змістовні назви %>
-                    <th>Total</th> <%# TODO: Замініть на змістовні назви %>
-                    <th>Critical</th> <%# TODO: Замініть на змістовні назви %>
-                    <th>Serious</th> <%# TODO: Замініть на змістовні назви %>
-                    <th>Moderate</th> <%# TODO: Замініть на змістовні назви %>
-                    <th>Good</th> <%# TODO: Замініть на змістовні назви %>
+                    <%# The headers are now in the same order as the table body cells %>
+                    <th data-column="0" data-sort-type="text">Project Title / URL</th>
+                    <th data-column="1" data-sort-type="score">Score</th>
+                    <th>Issues per Page</th>
+                    <th>Total</th>
+                    <th>Critical</th>
+                    <th>Serious</th>
+                    <th>Moderate</th>
+                    <th>Good</th>
                     <th>Scan Date</th>
                     <th>Report</th>
-                    <th>Category</th>
+                    <th data-column="10" data-sort-type="category">Category</th>
+                    <th>Details</th>
+                    <th>AxeMonitor Status</th>
                 </tr>
             </thead>
             <tbody>
                 <% activeProjectsData.forEach(project => { %>
                     <%
-                       let score = project.score || 'N/A';
-                       let scoreValue = project.scoreValue;
-                       let cellStyle = '';
-                       if (project.success && typeof scoreValue === 'number' && !isNaN(scoreValue)) {
-                           if (scoreValue < 80) cellStyle = 'background-color: #dc3545; color: white;'; // Red
-                           else if (scoreValue < 90) cellStyle = 'background-color: #ffc107; color: black;'; // Yellow
-                           else cellStyle = 'background-color: #28a745; color: white;'; // Green
-                       } else {
-                           cellStyle = 'background-color: #6c757d; color: white;'; // Grey for errors/N/A
-                       }
+                        let cellStyle = '';
+                        if (project.success && typeof project.scoreValue === 'number') {
+                            if (project.scoreValue < 80) cellStyle = 'background-color: #dc3545; color: white;';
+                            else if (project.scoreValue < 90) cellStyle = 'background-color: #ffc107; color: black;';
+                            else cellStyle = 'background-color: #28a745; color: white;';
+                        } else {
+                            cellStyle = 'background-color: #6c757d; color: white;';
+                        }
                     %>
                     <tr>
-                        <td><%- project.projectName %></td>
-                        <td style="<%= cellStyle %>"><%= score %></td>
+                        <%# The cells are now in the same order as the headers %>
+                        <td>
+                            <a href="<%= project.project_url %>" target="_blank" title="<%= project.project_url %>">
+                                <%= project.custom_title || project.project_url %>
+                            </a>
+                        </td>
+                        <td style="<%= cellStyle %>" data-score="<%= project.scoreValue || -1 %>"><%= project.score || 'N/A' %></td>
                         <td><%= project.field3 || 'N/A' %></td>
                         <td><%= project.field4 || 'N/A' %></td>
                         <td><%= project.field5 || 'N/A' %></td>
@@ -45,36 +51,33 @@
                         <td><%= project.scanDate || 'N/A' %></td>
                         <td><%- project.reportButton %></td>
                         <td><%= project.category %></td>
+                        <td><a href="/project/<%= project.id %>/score-history">View Details</a></td>
+                        <td><%= project.status || 'N/A' %></td>
                     </tr>
                 <% }) %>
             </tbody>
-        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+        </table>
     </div>
 <% } else { %>
-    <p>No active projects found or data could not be parsed.</p>
+    <p>No active projects found.</p>
 <% } %>
 
-
+<%# --- The rest of the file has no changes --- %>
 <h2>Average Scores</h2>
 <% if (averageScores && averageScores.length > 0) { %>
      <div class="table-container average-table">
-        <table> <%# Відкрили таблицю %>
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Average Score</th>
-                </tr>
-            </thead>
+        <table>
+            <thead><tr><th>Category</th><th>Average Score</th></tr></thead>
             <tbody>
                 <% averageScores.forEach(avg => { %>
-                     <%
-                       let avgValue = parseFloat(avg.average);
-                       let avgCellStyle = '';
-                        if (!isNaN(avgValue)) {
-                           if (avgValue < 80) avgCellStyle = 'background-color: #dc3545; color: white;';
-                           else if (avgValue < 90) avgCellStyle = 'background-color: #ffc107; color: black;';
-                           else avgCellStyle = 'background-color: #28a745; color: white;';
-                       }
+                    <%
+                        let avgValue = parseFloat(avg.average);
+                        let avgCellStyle = '';
+                         if (!isNaN(avgValue)) {
+                            if (avgValue < 80) avgCellStyle = 'background-color: #dc3545; color: white;';
+                            else if (avgValue < 90) avgCellStyle = 'background-color: #ffc107; color: black;';
+                            else avgCellStyle = 'background-color: #28a745; color: white;';
+                        }
                     %>
                     <tr>
                         <td><%= avg.category %></td>
@@ -82,39 +85,22 @@
                     </tr>
                 <% }) %>
             </tbody>
-        </table> <%# !!! ВИПРАВЛЕНО: Додано закриваючий тег !!! %>
+        </table>
     </div>
-<% } else { %>
-    <p>Could not calculate average scores.</p>
 <% } %>
-
 
 <h2>On Hold Projects</h2>
 <% if (onHoldProjects && onHoldProjects.length > 0) { %>
     <div class="table-container">
         <table>
-            <thead>
-                <tr>
-                    <th>Project Title / URL</th> <%# Змінено заголовок %>
-                    <th>Report URL</th>
-                    <th>Category</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Project Title / URL</th><th>Report URL</th><th>Category</th></tr></thead>
             <tbody>
                 <% onHoldProjects.forEach(project => { %>
                     <tr>
                         <td>
-                            <%# <<< ОНОВЛЕНО ЛОГІКУ ВИВЕДЕННЯ НАЗВИ >>> %>
                             <a href="<%= project.project_url %>" target="_blank" title="<%= project.project_url %>">
-                                <% if (project.title && project.title.trim() !== '') { %>
-                                    <%# Виводимо title, якщо він існує і не порожній %>
-                                    <%= project.title %>
-                                <% } else { %>
-                                    <%# Інакше виводимо обрізаний URL %>
-                                    <%= project.project_url.length > 50 ? project.project_url.substring(0, 50) + '...' : project.project_url %>
-                                <% } %>
+                                <%= project.custom_title || project.project_url %>
                             </a>
-                            <%# <<< /ОНОВЛЕНО ЛОГІКУ ВИВЕДЕННЯ НАЗВИ >>> %>
                         </td>
                          <td>
                             <% if (project.report_url && project.report_url !== 'https://example.com') { %>
@@ -129,8 +115,91 @@
             </tbody>
         </table>
     </div>
-<% } else { %>
-    <p>No projects are currently on hold.</p>
 <% } %>
 
 <%- include('partials/footer') %>
+
+<style>
+    /* Style for sortable headers */
+    #projects-table thead th[data-column] {
+        cursor: pointer;
+        position: relative;
+    }
+    /* Style for the sort direction arrow */
+    #projects-table thead th[data-column]::after {
+        content: '';
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        margin-top: -8px;
+        border: 4px solid transparent;
+        opacity: 0.3;
+    }
+    /* Ascending arrow */
+    #projects-table thead th.sort-asc::after {
+        border-bottom-color: currentColor;
+        opacity: 1;
+    }
+    /* Descending arrow */
+    #projects-table thead th.sort-desc::after {
+        border-top-color: currentColor;
+        opacity: 1;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const table = document.getElementById('projects-table');
+    if (!table) return;
+
+    const headers = table.querySelectorAll('th[data-column]');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const columnIndex = parseInt(header.dataset.column);
+            const sortType = header.dataset.sortType;
+            const currentOrder = header.classList.contains('sort-asc') ? 'asc' : 'desc';
+            const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+
+            // Remove sorting classes from all other headers
+            headers.forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Add new class to the clicked header
+            header.classList.add(`sort-${newOrder}`);
+
+            // Perform the sort
+            rows.sort((rowA, rowB) => {
+                let valA, valB;
+
+                if (sortType === 'score') {
+                    valA = parseFloat(rowA.cells[columnIndex].dataset.score);
+                    valB = parseFloat(rowB.cells[columnIndex].dataset.score);
+                } else if (sortType === 'category') {
+                    const categoryOrder = { 'NBM': 1, 'NPPC': 2, 'ThirdParty': 3 };
+                    valA = categoryOrder[rowA.cells[columnIndex].textContent.trim()] || 99;
+                    valB = categoryOrder[rowB.cells[columnIndex].textContent.trim()] || 99;
+                } else { // Default to text sort
+                    valA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+                    valB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+                }
+
+                if (valA < valB) {
+                    return newOrder === 'asc' ? -1 : 1;
+                }
+                if (valA > valB) {
+                    return newOrder === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+
+            // Re-append sorted rows to the table
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+</script>

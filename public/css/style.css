@@ -1,223 +1,197 @@
-/* public/css/style.css */
+/* General Body & Typography */
 body {
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f5f7; /* Light grey background for less eye strain */
+    color: #1a1a1a; /* Off-black for better readability */
     margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
     line-height: 1.6;
 }
 
+main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    color: #1a1a1a;
+    margin-top: 0;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Header & Navigation */
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem 0;
-    text-align: center;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #d93025; /* Red accent border */
 }
 
 header h1 {
+    color: #ffffff;
     margin: 0;
-    padding-bottom: 0.5rem;
+    font-size: 1.5rem;
 }
 
-nav ul {
-    list-style: none;
+header nav ul {
+    margin: 0;
     padding: 0;
-    margin: 0;
-    background-color: #444;
-    text-align: center;
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
 }
 
-nav ul li {
-    display: inline-block;
-}
-
-nav ul li a {
-    color: #fff;
+header nav a {
+    color: #ffffff;
     text-decoration: none;
-    padding: 0.8rem 1.5rem;
-    display: block;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease-in-out;
 }
 
-nav ul li a:hover {
-    background-color: #555;
+header nav a:hover {
+    border-bottom-color: #d93025; /* Red accent on hover */
+    text-decoration: none;
 }
 
-main {
-    padding: 20px;
-    max-width: 100%;
-    margin: 20px auto;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-footer {
-    text-align: center;
-    margin-top: 30px;
-    padding: 15px;
-    color: #777;
-    border-top: 1px solid #eee;
-}
-
+/* Tables */
 .table-container {
-    overflow-x: auto; /* Дозволяє прокрутку таблиць на малих екранах */
-    margin-bottom: 25px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow-x: auto; /* For responsive tables */
+    margin-bottom: 2rem;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 10px 12px; /* Збільшив відступи */
+    padding: 1rem;
     text-align: left;
-    vertical-align: middle; /* Вирівнювання по центру */
+    border-bottom: 1px solid #e9ecef;
 }
 
-th {
-    background-color: #f2f2f2;
+thead th {
+    background-color: #f8f9fa;
     font-weight: bold;
+    color: #343a40;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #f8f9fa;
 }
 
 tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: #e9ecef;
 }
 
-.average-table table {
-    width: 50%; /* Менша ширина для таблиці середніх значень */
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Стилі для кнопок та посилань */
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
-
-button, .btn {
-    padding: 8px 15px;
+/* Forms & Buttons */
+.btn, button {
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    margin: 2px;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
 .btn-primary, button[type="submit"] {
-    background-color: #007bff;
+    background-color: #d93025; /* Red for primary actions */
     color: white;
 }
 .btn-primary:hover, button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #b0261c;
 }
 
-.edit-btn {
-    background-color: #ffc107;
-    color: black;
+.btn-secondary, .cancel-btn {
+    background-color: #6c757d;
+    color: white;
 }
-.edit-btn:hover {
-    background-color: #e0a800;
+.btn-secondary:hover, .cancel-btn:hover {
+    background-color: #5a6268;
 }
 
- .delete-btn {
+.btn-danger {
     background-color: #dc3545;
     color: white;
 }
-.delete-btn:hover {
-    background-color: #c82333;
+
+/* Admin Page Specific Styles */
+.forms-wrapper {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
-
- .cancel-btn {
-     background-color: #6c757d;
-     color: white;
-     display: inline-block; /* Щоб виглядав як кнопка */
-     padding: 8px 15px;
-     border-radius: 4px;
-     text-decoration: none;
-     margin-left: 10px;
- }
- .cancel-btn:hover {
-     background-color: #5a6268;
- }
-
- button:disabled {
-     background-color: #6c757d;
-     cursor: not-allowed;
- }
-
- td.actions {
-    white-space: nowrap; /* Заборона переносу кнопок */
- }
-
- /* Адмін форми */
-.admin-form {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #eee;
-    background-color: #fdfdfd;
-    border-radius: 5px;
+.form-container.admin-form {
+    flex: 1;
+    min-width: 300px;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #ffffff;
 }
-.admin-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+.admin-form .form-group {
+    margin-bottom: 1rem;
 }
-.admin-form input[type="text"],
-.admin-form input[type="url"],
-.admin-form select {
+.admin-form input, .admin-form select {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
+    padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* Важливо для width: 100% */
+    box-sizing: border-box;
 }
- .admin-form button[type="submit"] {
-    margin-top: 10px;
- }
 
-/* Повідомлення */
- .message {
-     padding: 15px;
-     margin-bottom: 20px;
-     border-radius: 5px;
-     border: 1px solid transparent;
- }
- .message.success {
-     color: #155724;
-     background-color: #d4edda;
-     border-color: #c3e6cb;
- }
-  .message.error {
-     color: #721c24;
-     background-color: #f8d7da;
-     border-color: #f5c6cb;
- }
+/* Messages */
+.message {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+.message.error, .error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+.message.success, .success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
 
-/* Адаптивність (простий приклад) */
-@media (max-width: 768px) {
-    nav ul li {
-        display: block;
-        text-align: center;
-    }
-    .average-table table {
-        width: 90%;
-    }
-     .admin-form input[type="text"],
-     .admin-form input[type="url"],
-     .admin-form select {
-        width: calc(100% - 22px); /* Враховуємо padding і border */
-     }
+/* Score History & Chart Styles */
+.history-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.chart-container {
+    padding: 1.5rem;
+    width: 95%;
+    height: 30vh;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    margin-bottom: 2rem;
 }

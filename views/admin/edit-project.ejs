@@ -1,0 +1,8 @@
+// Add custom_title field to the edit project form
+<form action="/admin/projects/edit/<%= project.id %>" method="POST">
+    <!-- ...existing fields... -->
+    <label for="custom_title">Custom Title:</label>
+    <input type="text" id="custom_title" name="custom_title" value="<%= project.custom_title || '' %>">
+    <!-- ...existing fields... -->
+    <button type="submit">Save</button>
+</form>

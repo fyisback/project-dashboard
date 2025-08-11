@@ -1,114 +1,115 @@
 // services/parser.js
 const axios = require('axios');
 const cheerio = require('cheerio');
+const db = require('./db');
 
 async function fetchData(url, retries = 3) {
     try {
-        const { data } = await axios.get(url, { timeout: 5000 }); // Timeout 20 sec
+        const { data } = await axios.get(url, { timeout: 20000 });
         return data;
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
-             console.error(`Timeout fetching data from ${url} after 20 seconds.`);
-             return null;
-        }
-        if (error.response && error.response.status === 404 && retries > 0) {
-            console.warn(`404 Error fetching data from <span class="math-inline">\{url\}\. Retrying \(</span>{retries} left)...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return fetchData(url, retries - 1);
-        } else {
-            console.error(`Non-404 Error fetching data from ${url}: ${error.message}`);
+            console.error(`Timeout fetching data from ${url}.`);
             return null;
         }
+        console.error(`Error fetching data from ${url}: ${error.message}`);
+        return null;
     }
 }
 
 function parseProjectDetails(html, url) {
-    // Структура для помилок/невдач
     const errorResult = {
-        projectName: `<a href="${url}" target="_blank">Parse Error/Fetch Failed</a>`, // Посилання навіть при помилці
         score: 'N/A',
-        parsedFields: ['', '', '', '', '', '', ''], // Завжди 7 порожніх полів за замовчуванням
+        parsedFields: ['', '', '', '', '', ''],
         scanDate: 'Failed',
         success: false,
-        scoreValue: 0
+        scoreValue: 0,
+        issuesHtml: null
     };
 
-    if (!html) {
-        console.warn(`No HTML content received for URL: ${url}. Cannot parse.`);
-        return { ...errorResult, projectName: `<a href="${url}" target="_blank">Fetch Failed</a>` };
-    }
+    if (!html) return errorResult;
 
     try {
         const $ = cheerio.load(html);
-        // Починаємо з результату за замовчуванням
         const result = { ...errorResult };
 
-        // --- КЛЮЧОВА ЗМІНА: Отримуємо назву проекту з #active_project ЗАВЖДИ СПОЧАТКУ ---
-        const actualProjectName = $('#active_project').text().trim() || 'Unknown Project Name';
-        // Формуємо HTML-посилання для назви проекту
-        result.projectName = `<a href="${url}" target="_blank">${actualProjectName}</a>`;
-        // --- Кінець ключової зміни ---
-
-        // Тепер пробуємо отримати решту даних з таблиці та інших елементів
-        // *** Переконайтесь, що ці селектори правильні для ВАШИХ цільових сторінок ***
         const table = $('#workspaceSummary');
         const rows = table.find('tbody tr');
-        const scanDateElement = $('#scanCompleteDate');
-
         if (rows.length > 0) {
-            // Якщо таблиця існує, парсимо її дані
             const dataCells = $(rows[0]).find('th, td');
             const firstEightColumns = dataCells.slice(0, 8).map((i, el) => $(el).text().trim()).get();
-
-            // Перезаписуємо значення score, parsedFields, scanDate з таблиці
-            // Назву проекту (result.projectName) вже встановлено вище!
-            result.score = firstEightColumns[1] || '0'; // Score з другої колонки
-            result.parsedFields = Array.from({ length: 6 }, (_, i) => firstEightColumns[i + 2] || ''); // Поля 3-8
-            result.scanDate = scanDateElement.text().trim() || 'N/A';
-            result.success = true; // Позначаємо, що вдалося отримати дані з таблиці
+            result.score = firstEightColumns[1] || '0';
+            result.parsedFields = Array.from({ length: 6 }, (_, i) => firstEightColumns[i + 2] || '');
+            result.scanDate = $('#scanCompleteDate').text().trim() || 'N/A';
+            result.success = true;
             result.scoreValue = parseFloat(result.score?.replace('%', '')) || 0;
-
-        } else {
-            // Якщо таблиця не знайдена, логуємо попередження
-            console.warn(`Table #workspaceSummary or rows not found for ${url}. Project name taken from #active_project.`);
-            // Залишаємо значення за замовчуванням (N/A, Failed) для score, полів, дати
-            // Статус success можна залишити false, або визначити на основі наявності #active_project
-            result.success = ($('#active_project').length > 0); // Вважаємо успіхом, якщо хоча б назва є? (Опціонально)
         }
-        return result; // Повертаємо об'єкт з даними
+
+        const issuesTable = $('#accessibilityIssues');
+        if (issuesTable.length > 0) {
+            // --- ✅ FIXED: Make all links in the table absolute ---
+            const baseUrl = new URL(url).origin; // Gets "https://nestle-axemonitor.dequecloud.com"
+            issuesTable.find('a').each((i, el) => {
+                const link = $(el);
+                const href = link.attr('href');
+                // If the link starts with a '/', it's a relative link
+                if (href && href.startsWith('/')) {
+                    // Prepend the base URL to make it a full, working link
+                    link.attr('href', `${baseUrl}${href}`);
+                }
+            });
+            // --- End of fix ---
+
+            result.issuesHtml = $.html(issuesTable);
+        }
+
+        return result;
 
     } catch (parseError) {
         console.error(`Error parsing HTML for ${url}: ${parseError.message}`);
-        // При помилці парсингу, повертаємо result, де назва вже встановлена як Parse Error/Fetch Failed
-        // але все ще є посиланням
-        result.projectName = `<a href="${url}" target="_blank">Parse Error</a>`;
-        return result; // Повертаємо об'єкт помилки
+        return errorResult;
     }
 }
 
 async function getParsedDataForProject(project) {
+    if (!project || !project.project_url) {
+        return { ...project, success: false, score: 'N/A', scanDate: 'Invalid Project' };
+    }
+
     const html = await fetchData(project.project_url);
     const parsedDetails = parseProjectDetails(html, project.project_url);
 
+    if (parsedDetails.success && parsedDetails.scanDate !== 'N/A') {
+        try {
+            const lastScan = db.prepare('SELECT scan_date FROM project_scores WHERE project_id = ? ORDER BY checked_at DESC LIMIT 1').get(project.id);
+
+            if (!lastScan || lastScan.scan_date !== parsedDetails.scanDate) {
+                console.log(`New scan found for project ${project.id}. Saving score and issues.`);
+                const stmt = db.prepare(
+                    'INSERT INTO project_scores (project_id, score, scan_date, issues_html) VALUES (?, ?, ?, ?)'
+                );
+                stmt.run(project.id, parsedDetails.scoreValue, parsedDetails.scanDate, parsedDetails.issuesHtml);
+            }
+        } catch (dbError) {
+            console.error(`Database error for project ${project.id}:`, dbError);
+        }
+    }
+
     const reportButton = project.report_url === 'https://example.com' || !project.report_url
-        ? `<button disabled style="background-color: grey; color: white; border: none; padding: 5px 10px; cursor: not-allowed; border-radius: 4px;">Report</button>`
+        ? `<button disabled style="background-color: #e9ecef; color: #6c757d; border: 1px solid #ced4da; padding: 5px 10px; cursor: not-allowed; border-radius: 4px;">Report</button>`
         : `<a href="${project.report_url}" target="_blank"><button style="background-color: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">Report</button></a>`;
 
-    const dashboardData = {
-        projectName: parsedDetails.projectName,
-        score: parsedDetails.score,
-        success: parsedDetails.success,
-        scoreValue: parsedDetails.scoreValue,
+    const finalData = {
+        ...project,
+        ...parsedDetails,
+        reportButton: reportButton,
         ...parsedDetails.parsedFields.reduce((obj, val, idx) => {
-            obj[`field${idx + 3}`] = val; // field3, field4, ..., field8
+            obj[`field${idx + 3}`] = val;
             return obj;
         }, {}),
-        scanDate: parsedDetails.scanDate,
-        reportButton: reportButton,
-        category: project.category,
     };
 
-    return dashboardData;
+    return finalData;
 }
 
 module.exports = { getParsedDataForProject };

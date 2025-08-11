@@ -1,35 +1,77 @@
 <%- include('partials/header') %>
 
-<h2>Edit <%= projectType === 'active' ? 'Active' : 'On-Hold' %> Project (ID: <%= project.id %>)</h2>
+<div class="form-container">
+    <h2>Edit <%= projectType === 'active' ? 'Active' : 'On-Hold' %> Project</h2>
 
-<% if (locals.errorMessage) { %>
-    <p class="message error"><%= errorMessage %></p>
-<% } %>
-
-<form action="/admin/edit/<%= projectType %>/<%= project.id %>" method="POST" class="admin-form">
-
-    <%# <<< ДОДАНО УМОВУ ТА БЛОК ДЛЯ TITLE (ТІЛЬКИ ДЛЯ ON HOLD) >>> %>
-    <% if (projectType === 'onhold') { %>
-        <label for="title">Project Title (Optional):</label>
-        <input type="text" id="title" name="title" value="<%= project.title || '' %>" placeholder="Enter a descriptive title">
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+        <p class="error-message"><%= errorMessage %></p>
     <% } %>
-    <%# <<< /ДОДАНО УМОВУ ТА БЛОК ДЛЯ TITLE >>> %>
 
-    <label for="project_url">Project URL:</label>
-    <input type="url" id="project_url" name="project_url" value="<%= project.project_url %>" required>
+    <form action="/admin/edit/<%= projectType %>/<%= project.id %>" method="POST">
+        
+        <div class="form-group">
+            <label for="custom_title">Custom Title (Optional)</label>
+            <input type="text" id="custom_title" name="custom_title" value="<%= project.custom_title || '' %>">
+        </div>
 
-    <label for="report_url">Report URL:</label>
-    <input type="url" id="report_url" name="report_url" value="<%= project.report_url || '' %>" placeholder="Optional (e.g., https://example.com)">
+        <div class="form-group">
+            <label for="project_url">Project URL</label>
+            <input type="url" id="project_url" name="project_url" value="<%= project.project_url || '' %>" required>
+        </div>
 
-    <label for="category">Category:</label>
-    <select id="category" name="category" required>
-        <option value="NBM" <%= project.category === 'NBM' ? 'selected' : '' %>>NBM</option>
-        <option value="ThirdParty" <%= project.category === 'ThirdParty' ? 'selected' : '' %>>ThirdParty</option>
-        <option value="NPPC" <%= project.category === 'NPPC' ? 'selected' : '' %>>NPPC</option>
-    </select>
+        <div class="form-group">
+            <label for="report_url">Report URL</label>
+            <input type="url" id="report_url" name="report_url" value="<%= project.report_url || '' %>">
+        </div>
 
-    <button type="submit" class="btn-primary">Update Project</button>
-    <a href="/admin" class="btn cancel-btn">Cancel</a>
-</form>
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="NBM" <%= project.category === 'NBM' ? 'selected' : '' %>>NBM</option>
+                <option value="ThirdParty" <%= project.category === 'ThirdParty' ? 'selected' : '' %>>ThirdParty</option>
+                <option value="NPPC" <%= project.category === 'NPPC' ? 'selected' : '' %>>NPPC</option>
+            </select>
+        </div>
+
+        <% if (projectType === 'active') { %>
+            <div class="form-group">
+                <label for="status">AxeMonitor Status</label>
+                <select id="status" name="status">
+                    <option value="New scan available" <%= project.status === 'New scan available' ? 'selected' : '' %>>New scan available</option>
+                    <option value="In progress" <%= project.status === 'In progress' ? 'selected' : '' %>>In progress</option>
+                    <option value="Delivered to the team" <%= project.status === 'Delivered to the team' ? 'selected' : '' %>>Delivered to the team</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contact_person">Contact Person (Email)</label>
+                <input type="email" id="contact_person" name="contact_person" value="<%= project.contact_person || '' %>">
+            </div>
+
+            <!-- NEW: Ticketing Portal URL input field -->
+            <div class="form-group">
+                <label for="ticketing_portal_url">Ticketing Portal URL</label>
+                <input type="url" id="ticketing_portal_url" name="ticketing_portal_url" value="<%= project.ticketing_portal_url || '' %>">
+            </div>
+        <% } %>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Project</button>
+            <a href="/admin" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
 
 <%- include('partials/footer') %>
+
+<style>
+    .form-container { max-width: 600px; margin: 2rem auto; padding: 2rem; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .form-actions { display: flex; gap: 1rem; }
+    .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; color: white; font-weight: bold; }
+    .btn-primary { background-color: #007bff; }
+    .btn-secondary { background-color: #6c757d; }
+    .error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
+</style>
