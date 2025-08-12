@@ -7,7 +7,6 @@ const pLimit = require('p-limit').default;
 
 const limit = pLimit(5);
 
-// No changes to the main dashboard route '/' or calculateCategoryAverages
 function calculateCategoryAverages(parsedData) {
     const categories = ['NBM', 'ThirdParty', 'NPPC'];
     const categoryScores = categories.reduce((acc, category) => ({ ...acc, [category]: { sum: 0, count: 0 } }), {});
@@ -29,6 +28,85 @@ function calculateCategoryAverages(parsedData) {
     return averages;
 }
 
+// --- Share Page Routes ---
+router.get('/share/:token', async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const project = db.prepare('SELECT * FROM projects WHERE share_token = ?').get(token);
+
+        if (!project) {
+            return res.status(404).render('404', { pageTitle: 'Project Not Found' });
+        }
+
+        const scores = db.prepare('SELECT * FROM project_scores WHERE project_id = ? ORDER BY checked_at ASC').all(project.id);
+        const actionItems = db.prepare('SELECT * FROM project_action_items WHERE project_id = ? ORDER BY created_at DESC').all(project.id);
+
+        res.render('share-details', {
+            pageTitle: `Details for ${project.custom_title || project.project_url}`,
+            project,
+            scores,
+            actionItems,
+            message: req.query.message,
+            host: req.get('host'),
+            protocol: req.protocol
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/share/:token/notes', (req, res) => {
+    const { token } = req.params;
+    const { notes } = req.body;
+    try {
+        const project = db.prepare('SELECT id FROM projects WHERE share_token = ?').get(token);
+        if (project) {
+            db.prepare('UPDATE projects SET meeting_notes = ? WHERE id = ?').run(notes, project.id);
+        }
+    } catch (err) {
+        console.error("Error saving notes from share page:", err);
+    }
+    res.redirect(`/share/${token}?message=Notes%20saved.`);
+});
+
+// NEW: Route to handle deleting notes from the share page
+router.post('/share/:token/notes/delete', (req, res) => {
+    const { token } = req.params;
+    try {
+        const project = db.prepare('SELECT id FROM projects WHERE share_token = ?').get(token);
+        if (project) {
+            db.prepare('UPDATE projects SET meeting_notes = NULL WHERE id = ?').run(project.id);
+        }
+    } catch (err) {
+        console.error("Error deleting notes from share page:", err);
+    }
+    res.redirect(`/share/${token}?message=Notes%20deleted.`);
+});
+
+router.post('/share/:token/action-items/:action/:itemId?', (req, res) => {
+    const { token, action, itemId } = req.params;
+    const project = db.prepare('SELECT id FROM projects WHERE share_token = ?').get(token);
+    if (!project) return res.redirect('/');
+
+    try {
+        if (action === 'add') {
+            const { task, description, owner, priority } = req.body;
+            db.prepare('INSERT INTO project_action_items (project_id, task, description, owner, priority) VALUES (?, ?, ?, ?, ?)')
+              .run(project.id, task, description, owner, priority);
+        } else if (action === 'update' && itemId) {
+            const { status } = req.body;
+            db.prepare('UPDATE project_action_items SET status = ? WHERE id = ?').run(status, itemId);
+        } else if (action === 'delete' && itemId) {
+            db.prepare('DELETE FROM project_action_items WHERE id = ?').run(itemId);
+        }
+    } catch (err) {
+        console.error(`Error with action item '${action}':`, err);
+    }
+    res.redirect(`/share/${token}`);
+});
+
+
+// --- Original Dashboard Routes ---
 router.get('/', async (req, res, next) => {
     try {
         const activeProjects = db.prepare('SELECT * FROM projects ORDER BY id').all();
@@ -39,11 +117,10 @@ router.get('/', async (req, res, next) => {
         res.render('dashboard', {
             pageTitle: 'Project Dashboard',
             activeProjectsData: parsedProjectData,
-            averageScores: averageScores,
-            onHoldProjects: onHoldProjects
+            averageScores,
+            onHoldProjects
         });
     } catch (err) {
-        console.error("Error fetching data for dashboard:", err);
         next(err);
     }
 });
@@ -51,24 +128,20 @@ router.get('/', async (req, res, next) => {
 router.get('/project/:id/score-history', (req, res, next) => {
     try {
         const projectId = req.params.id;
-        const project = db.prepare('SELECT id, custom_title, project_url, meeting_notes FROM projects WHERE id = ?').get(projectId);
-
-        if (!project) {
-            return res.status(404).render('404', { pageTitle: 'Project Not Found' });
-        }
-
-        const scores = db.prepare('SELECT id, score, scan_date, checked_at, issues_html FROM project_scores WHERE project_id = ? ORDER BY checked_at ASC').all(projectId);
+        const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+        if (!project) return res.status(404).render('404', { pageTitle: 'Project Not Found' });
+        const scores = db.prepare('SELECT * FROM project_scores WHERE project_id = ? ORDER BY checked_at ASC').all(projectId);
         const actionItems = db.prepare('SELECT * FROM project_action_items WHERE project_id = ? ORDER BY created_at DESC').all(projectId);
-
         res.render('score-history', {
             pageTitle: `Details for ${project.custom_title || project.project_url}`,
             project,
             scores,
             actionItems,
-            message: req.query.message
+            message: req.query.message,
+            host: req.get('host'),
+            protocol: req.protocol
         });
     } catch (err) {
-        console.error(`Error fetching score history for project ID ${req.params.id}:`, err);
         next(err);
     }
 });
@@ -77,16 +150,23 @@ router.post('/project/notes/:projectId', (req, res) => {
     const { projectId } = req.params;
     const { notes } = req.body;
     try {
-        const stmt = db.prepare('UPDATE projects SET meeting_notes = ? WHERE id = ?');
-        stmt.run(notes, projectId);
-        res.redirect(`/project/${projectId}/score-history?message=Notes%20saved%20successfully.`);
+        db.prepare('UPDATE projects SET meeting_notes = ? WHERE id = ?').run(notes, projectId);
+        res.redirect(`/project/${projectId}/score-history?message=Notes%20saved.`);
     } catch (err) {
-        console.error(`Error saving notes for project ID ${projectId}:`, err);
         res.redirect(`/project/${projectId}/score-history?message=Error%20saving%20notes.`);
     }
 });
 
-// UPDATED: The add route now handles the 'description' field.
+router.post('/project/notes/:projectId/delete', (req, res) => {
+    const { projectId } = req.params;
+    try {
+        db.prepare('UPDATE projects SET meeting_notes = NULL WHERE id = ?').run(projectId);
+        res.redirect(`/project/${projectId}/score-history?message=Notes%20deleted.`);
+    } catch (err) {
+        res.redirect(`/project/${projectId}/score-history?message=Error%20deleting%20notes.`);
+    }
+});
+
 router.post('/project/:projectId/action-items/add', (req, res) => {
     const { projectId } = req.params;
     const { task, description, owner, priority } = req.body;
